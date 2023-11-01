@@ -1,40 +1,66 @@
 // Se obtiene la ruta del archivo
 // import
 //const fnApp = require("./lib/app.js");
-const { getURLStatus, transformRoute, routeExists, isMarkdownFile, readMarkdownFile, isUrlValid } = require("./lib/app.js");
+const { getURLStatus, transformRoute, routeExists, extractMarkdownLinks, isMarkdownFile, readMarkdownFile, isUrlValid } = require("./lib/app.js");
 const readline = require("readline");
 const fs = require("fs");
 
 // Definición de la función mdLinks que verifica y resuelve rutas
 const mdLinks = (route) => new Promise((resolve, reject) => {
-    const asbRoute = transformRoute(route);
-    if (routeExists(asbRoute)) {
-        if (isMarkdownFile(asbRoute)) {
+    console.log("Iniciando mdLinks con la ruta:", route);
+    const absRoute = transformRoute(route); // Corregido el nombre de la variable
+    console.log("Ruta absoluta:", absRoute);
+
+    if (routeExists(absRoute)) {
+        console.log("La ruta existe.");
+        if (isMarkdownFile(absRoute)) {
+            console.log("Es un archivo Markdown válido.");
             // Leer el contenido
-            const markdownContent = readMarkdownFile(asbRoute);
+            const markdownContent = readMarkdownFile(absRoute);
             if (markdownContent !== null) {
+                console.log("Contenido del archivo Markdown:", markdownContent);
+
+                const links = extractMarkdownLinks(markdownContent); // Agregar función para extraer enlaces
+                console.log("Enlaces extraídos:", links);
+
+                const results = [];
                 console.log(isUrlValid(markdownContent));
                 resolve(markdownContent);
+
                 const reader = readline.createInterface({
-                    input: fs.createReadStream(asbRoute) // Corregido el typo en "createReadStream"
+                    input: fs.createReadStream(absRoute) // Corregido el typo en "createReadStream"
                 });
                 reader.on("line", function (line) {
+                    console.log("Línea leída:", line);
                     const isUrl = isUrlValid(line);
                     if (isUrl) {
-                        getURLStatus (line).then((response) => { console.log(response); })
+                        //console.log("URL válida:", line);
+                        getURLStatus(line)
+                            .then((response) => {
+                                //console.log("URL:", line);
+                                console.log(response);})
+                        //results.push({ url: line, response });
                             .catch((e) => console.log(e));
                     }
                 });
+
+                reader.on("close", function() { // Corregido el typo en "close"
+                    console.log("Cierre del lector de líneas.");
+                    // Agregar los enlaces extraídos a los resultados
+                    results.push(...links); // Integrar los enlaces
+                    resolve(results);
+                });
             } else {
-                reject("Archivo vacío, prueba con otro".red);
+                reject("Archivo vacío, prueba con otro");
             }
         } else {
-            reject("Archivo inválido, prueba con un archivo md".red);
+            reject("Archivo inválido, prueba con un archivo md");
         }
     } else {
-        reject("Tu ruta no existe, prueba con otra".red);
+        reject("Tu ruta no existe, prueba con otra");
     }
 });
+
 
     
 // 1: Verifica si la ruta proporcionada es absoluta
@@ -60,11 +86,12 @@ const mdLinks = (route) => new Promise((resolve, reject) => {
 const route = "./examples/README.md";
 //C:\Users\lapto\Documents\DEV010-md-links\examples\README.md
 //const route = "./examples/examples.js";
-mdLinks(route).then((res)=>{
-    console.log(res);
-}).catch((err)=>{
-    console.log(err);
-});
+mdLinks(route)
+    .then((res)=>{
+        console.log(res);
+    }).catch((err)=>{
+        console.log(err);
+    });
 
 
 
