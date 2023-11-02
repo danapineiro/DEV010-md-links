@@ -16,43 +16,50 @@ const mdLinks = (route) => new Promise((resolve, reject) => {
         if (isMarkdownFile(absRoute)) {
             console.log("Es un archivo Markdown válido.");
             // Leer el contenido
-            const markdownContent = readMarkdownFile(absRoute);
-            if (markdownContent !== null) {
-                console.log("Contenido del archivo Markdown:", markdownContent);
+            readMarkdownFile(absRoute)
+                .then(res => {
+                    if (res !== null) {
+                        console.log("Contenido del archivo Markdown:", res);
 
-                const links = extractMarkdownLinks(markdownContent); // Agregar función para extraer enlaces
-                console.log("Enlaces extraídos:", links);
+                        const links = extractMarkdownLinks(res); // Agregar función para extraer enlaces
+                        console.log("Enlaces extraídos:", links, res);
 
-                const results = [];
-                console.log(isUrlValid(markdownContent));
-                resolve(markdownContent);
+                        const results = [];
+                        console.log(isUrlValid(res));
+                        resolve(res);
 
-                const reader = readline.createInterface({
-                    input: fs.createReadStream(absRoute) // Corregido el typo en "createReadStream"
-                });
-                reader.on("line", function (line) {
-                    console.log("Línea leída:", line);
-                    const isUrl = isUrlValid(line);
-                    if (isUrl) {
-                        //console.log("URL válida:", line);
-                        getURLStatus(line)
-                            .then((response) => {
-                                //console.log("URL:", line);
-                                console.log(response);})
-                        //results.push({ url: line, response });
-                            .catch((e) => console.log(e));
+                        const reader = readline.createInterface({
+                            input: fs.createReadStream(absRoute) // Corregido el tipo en "createReadStream"
+                        });
+                        reader.on("line", function (line) {
+                            console.log("Línea leída:", line);
+                            const isUrl = isUrlValid(line);
+                            console.log("isUrl:---->", isUrl);
+                            if (!isUrl) {
+                                //console.log("URL válida:", line);
+                                getURLStatus(line)
+                                    .then((response) => {
+                                        //console.log("URL:", line);
+                                        console.log(response);
+                                    })
+                                    //results.push({ url: line, response });
+                                    .catch((e) => console.log(e));
+                            }
+                        });
+
+                        reader.on("close", function () { // Corregido el tipo en "close"
+                            console.log("Cierre del lector de líneas.");
+                            // Agregar los enlaces extraídos a los resultados
+                            results.push(...links); // Integrar los enlaces
+                            console.log("results====>", results);
+                            resolve(results);
+                        });
                     }
+                })
+                .catch(error => {
+                    reject(error);
                 });
 
-                reader.on("close", function() { // Corregido el typo en "close"
-                    console.log("Cierre del lector de líneas.");
-                    // Agregar los enlaces extraídos a los resultados
-                    results.push(...links); // Integrar los enlaces
-                    resolve(results);
-                });
-            } else {
-                reject("Archivo vacío, prueba con otro");
-            }
         } else {
             reject("Archivo inválido, prueba con un archivo md");
         }
@@ -62,7 +69,7 @@ const mdLinks = (route) => new Promise((resolve, reject) => {
 });
 
 
-    
+
 // 1: Verifica si la ruta proporcionada es absoluta
 // if (path.isAbsoluteRoute(route)) {
 //     // 2: Si es absoluta, resuelve la promesa con la misma ruta
@@ -87,9 +94,9 @@ const route = "./examples/README.md";
 //C:\Users\lapto\Documents\DEV010-md-links\examples\README.md
 //const route = "./examples/examples.js";
 mdLinks(route)
-    .then((res)=>{
+    .then((res) => {
         console.log(res);
-    }).catch((err)=>{
+    }).catch((err) => {
         console.log(err);
     });
 
