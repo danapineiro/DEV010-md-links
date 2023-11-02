@@ -5,6 +5,7 @@ const { getURLStatus, transformRoute, routeExists, extractMarkdownLinks, isMarkd
 const readline = require("readline");
 const fs = require("fs");
 
+// empieza promesa
 // Definición de la función mdLinks que verifica y resuelve rutas
 const mdLinks = (route) => new Promise((resolve, reject) => {
     console.log("Iniciando mdLinks con la ruta:", route);
@@ -67,7 +68,61 @@ const mdLinks = (route) => new Promise((resolve, reject) => {
         reject("Tu ruta no existe, prueba con otra");
     }
 });
+//termina promesa
 
+//Prueba de promesa 2 sacando reader.on
+/*const mdLinks = (route) => new Promise((resolve, reject) => {
+    console.log("Iniciando mdLinks con la ruta:", route);
+    const absRoute = transformRoute(route); // Corregido el nombre de la variable
+    console.log("Ruta absoluta:", absRoute);
+
+    if (routeExists(absRoute)) {
+        console.log("La ruta existe.");
+        if (isMarkdownFile(absRoute)) {
+            console.log("Es un archivo Markdown válido.");
+            // Leer el contenido
+            readMarkdownFile(absRoute)
+                .then(res => {
+                    if (res !== null) {
+                        console.log("Contenido del archivo Markdown:", res);
+
+                        // Procesar las líneas una por una sin el uso de reader.on
+                        const lines = res.split('\n');
+                        const results = [];
+
+                        lines.forEach(line => {
+                            console.log("Línea leída:", line);
+                            const isUrl = isUrlValid(line);
+                            console.log("isUrl:---->", isUrl);
+                            if (!isUrl) {
+                                getURLStatus(line)
+                                    .then((response) => {
+                                        console.log(response);
+                                    })
+                                    .catch((e) => console.log(e));
+                            }
+                        });
+
+                        const links = extractMarkdownLinks(res); // Agregar función para extraer enlaces
+                        console.log("Enlaces extraídos:", links);
+
+                        // Agregar los enlaces extraídos a los resultados
+                        results.push(...links); // Integrar los enlaces
+                        console.log("results====>", results);
+                        resolve(results);
+                    }
+                })
+                .catch(error => {
+                    reject(error);
+                });
+        } else {
+            reject("Archivo inválido, prueba con un archivo md");
+        }
+    } else {
+        reject("Tu ruta no existe, prueba con otra");
+    }
+});
+*/
 
 
 // 1: Verifica si la ruta proporcionada es absoluta

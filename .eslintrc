@@ -1,5 +1,7 @@
 {
   "env": {
+    "browser": true,
+    "commonjs": true,
     "node": true
   },
   "parserOptions": {
