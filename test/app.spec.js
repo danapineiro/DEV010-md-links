@@ -8,8 +8,9 @@ describe("mdLinks", () => {
     });
 
 });*/
-const { transformRoute, routeExists, isMarkdownFile, readMarkdownFile, isUrlValid, extractMarkdownLinks } = require("../lib/app.js"); // ruta de módulo
+const { transformRoute, routeExists, isMarkdownFile, readMarkdownFile, isUrlValid, extractMarkdownLinks, getURLStatus } = require("../lib/app.js"); // ruta de módulo
 const path = require('path');
+const axios = require('axios');
 
 //test 1 transforma la ruta
 
@@ -67,58 +68,28 @@ describe('isMarkdownFile', () => {
 });
 
 //test 4 leer el archivo md
-
-it('Debería resolver la promesa con el contenido del archivo', (done) => {
-    const filePath = './examples/README.md'; // Reemplaza con la ruta real del archivo
-    const fileContent = `[md-links](https://github.com/Laboratoria/bootcamp/assets/1491/fc6bc380-7824-4fab-ab8f-7ab53cd9d0e4)\n[Node.js](https://nodejs.org/es/)\n[Node.js](www.google.com)`;
-    
-    // Simula la función fileReader para devolver el contenido del archivo
-    fileReader.mockImplementation((path, encoding, callback) => {
-      callback(null, fileContent);
-    });
-  
-    readMarkdownFile(filePath, fileReader)
-      .then((result) => {
-        expect(result).toBe(fileContent);
-        expect(fileReader).toHaveBeenCalledWith(filePath, 'utf-8', expect.any(Function));
-        done();
-      });
-  });
-  
-/*describe('readMarkdownFile', () => {
-    it('Debería resolver la promesa con el contenido del archivo', (done) => {
-        // Función simulada para la lectura de archivos
-        const fileReader = jest.fn((filePath, encoding, callback) => {
-            callback(null, '[md-links](https://github.com/Laboratoria/bootcamp/assets/12631491/fc6bc380-7824-4fab-ab8f-7ab53cd9d0e4')
-           
-        });
-
+describe('readMarkdownFile', () => {
+    it('debe leer el contenido de un archivo Markdown', () => {
         const filePath = "./examples/README.md";
-        readMarkdownFile(filePath, fileReader)
-            .then((result) => {
-                expect(result).toBe('Contenido del archivo');
-                expect(fileReader).toHaveBeenCalledWith(filePath, 'utf-8', expect.any(Function));
-                done();
-            });
-    });*/
-
-    it('Debería rechazar la promesa en caso de error al leer el archivo', (done) => {
-        // Función simulada para la lectura de archivos
-        const fileReader = jest.fn((filePath, encoding, callback) => {
-            callback(new Error('Error de lectura de archivo'), null);
+        readMarkdownFile(filePath, (error, content) => {
+            if (error) {
+                done(error); // Pasar el error a done para indicar un fallo en la prueba
+            } else {
+                expect(content).to.be.a('string'); // Comprueba que el contenido es una cadena
+                expect(content).to.include('contenido esperado'); // Comprueba que el contenido contiene lo que esperas
+                done(); // Llama a done() para indicar que la prueba ha finalizado con éxito
+            }
         });
-
-        const filePath = "./examples/README.md";
-
-        readMarkdownFile(filePath, fileReader)
-            .catch((error) => {
-                expect(error).toBeInstanceOf(Error);
-                expect(error.message).toBe('Error de lectura de archivo');
-                expect(fileReader).toHaveBeenCalledWith(filePath, 'utf-8', expect.any(Function));
-                done();
-            });
     });
 
+    it('debe manejar errores al leer un archivo inexistente', () => {
+        const filePath ='/Users/lapto/Documents/DEV010-md-links/examples/README.md';
+        readMarkdownFile(filePath, (error, content) => {
+            expect(error).to.be.an.instanceOf(Error); // Comprueba que se arroje un error
+            done(); // Llama a done() para indicar que la prueba ha finalizado con éxito
+        });
+    });
+});
 
 // test 5 encontraste urls validos
 
@@ -136,11 +107,6 @@ describe('isUrlValid', () => {
 
     it('Debería retornar false para una URL inválida', () => {
         const invalidUrls = [
-            //'not_a_url',
-            //'www.example.com',
-            //'ftp://',
-            //'file://path/to/file',
-            //'http://example.com:8080:', // URL con dos puntos seguidos en el puerto
             'http:/example.com',        // URL con un solo slash después del protocolo
             'https://example.com/lorem ipsum', // URL con espacio en la ruta
             'https://example.com?query=test?', // URL con dos signos de interrogación en la query
@@ -179,5 +145,31 @@ describe('extractMarkdownLinks', () => {
   });
 });
 
+// test 7 get url status
 
+jest.mock('axios');
 
+jest.mock('axios');
+
+describe('getURLStatus', () => {
+    it('debe devolver el estado de una URL válida', (done) => {
+        axios.get.mockResolvedValue({ status: 200 });
+
+        getURLStatus('https://github.com/Laboratoria/bootcamp/assets/12631491/fc6bc380-7824-4fab-ab8f-7ab53cd9d0e4').then((result) => {
+            expect(result).toEqual({ url: 'https://github.com/Laboratoria/bootcamp/assets/12631491/fc6bc380-7824-4fab-ab8f-7ab53cd9d0e4', status: 200 });
+            done();
+        });
+    });
+
+    it('debe manejar un error al obtener el estado de una URL inválida', (done) => {
+        axios.get.mockRejectedValue({ message: 'Request failed with status code 404' }); // Simulamos un error de URL no encontrada
+    
+        getURLStatus('https://example.com/lorem ipsum').then((result) => {
+            expect(result).toEqual({
+                url: 'https://example.com/lorem ipsum',
+                status: 'Error: Request failed with status code 404',
+            });
+            done();
+        });
+    });
+});
