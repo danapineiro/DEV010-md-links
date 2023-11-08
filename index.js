@@ -1,56 +1,79 @@
 // Se obtiene la ruta del archivo
 // import
-const path = require("./lib/app.js");
+//const fnApp = require("./lib/app.js");
+const { getURLStatus, transformRoute, routeExists, extractMarkdownLinks, isMarkdownFile, readMarkdownFile, isUrlValid } = require("./lib/app.js");
+const readline = require("readline");
 const fs = require("fs");
 
-// Aqui la funcion mdLinks
-// Definición de la función mdLinks que verifica y resuelve rutas
-const mdLinks = (route) => new Promise((resolve, reject) => {
-    // 1: Verifica si la ruta proporcionada es absoluta
-    if (path.isAbsolute(route)) {
-        // 2: Si es absoluta, resuelve la promesa con la misma ruta
-        resolve(route);
-    } else {
-        // 3: Si la ruta no es absoluta, intenta resolverla
-        const absolutePath = path.resolve(route);
 
-        // 4: Verificar si la ruta resuelta existe en el sistema
-        if (fs.existsSync(absolutePath)) {
-        // Si existe, resuelve la promesa con la ruta absoluta resultante
-            resolve(absolutePath);
+
+// empieza promesa
+// Definición de la función mdLinks que verifica y resuelve rutas
+const mdLinks = (route, validate) => new Promise((resolve, reject) => {
+    console.log('------------------------------------------', process.argv[2])
+    //console.log("Iniciando mdLinks con la ruta:", route);
+    const absRoute = transformRoute(route); // Corregido el nombre de la variable
+    //console.log("Ruta absoluta:", absRoute);
+
+    if (routeExists(absRoute)) {
+        //console.log("La ruta existe.");
+        if (isMarkdownFile(absRoute)) {
+            //console.log("Es un archivo Markdown válido.");
+            // Leer el contenido
+            readMarkdownFile(absRoute)
+                .then(res => {
+                    if (res !== null) {
+                        const resultLink= [] // => respuesta final
+                        //console.log("Contenido del archivo Markdown:", res);
+
+                        const links = extractMarkdownLinks(res); // Agregar función para extraer enlaces
+                        //console.log("Enlaces extraídos:", links, res);
+                        if(validate){
+                            const linksPromises = links.map(link => getURLStatus(link.href))
+                            console.log({linksPromises})
+
+                            Promise.all(linksPromises)
+                            .then(res =>{
+                                for (let i = 0; i < links.length; i++) {
+                                    //Agregar elementos a la respuesta final
+                                    const data ={
+                                        text: links[i].text,
+                                        url: links[i].href,
+                                        statusCode: res[i].status,
+                                        file: absRoute,
+                                        status: typeof res[i].status === 'string' ? 'Fail' : 'OK',
+                                    }
+                                    resultLink.push(data)  
+                                }
+                                console.log('RESULT==============================>', resultLink)
+                            })
+                            .catch(error => console.log({ error }))
+                        }
+                        else{
+                            console.log('RESULT==============================>', links)
+                        }
+                }
+                })
+                .catch(error => {
+                    console.log("function mdlinks :", error)
+                    reject(error);
+                });
+
         } else {
-        // Si no se puede resolver la ruta, rechaza la promesa con un mensaje de error
-            reject("La ruta no es valida o no existe en el sistema");
+            reject("Archivo inválido, prueba con un archivo md".red);
         }
+    } else {
+        reject("Tu ruta no existe, prueba con otra".red);
     }
 });
-// Imprime la definición de la función mdLinks en la consola
-console.log("Función mdLinks aloja mi promesa");
-console.log(mdLinks);
+//termina promesa
 
-
-
-
-/*const app = require ("./lib/app");
-const path = require ("path");
-const fs = require ("fs");
-
-const mdLinks = (route) => {
-    return new Promise ((resolve, reject) => {
-        if (path.isAbsolute(route)){
-            resolve(route);
-        } else {
-            const adsolutePath = path.resolve(route);
-            fs.access(adsolutePath, (error) => {
-                if (error) {
-                    reject("La ruta no es valida.");
-                } else {
-                    resolve(adsolutePath);
-                }
-            });
-        }
+const route = "./examples/README.md";
+//C:\Users\lapto\Documents\DEV010-md-links\examples\README.md
+//const route = "./examples/examples.js";
+mdLinks(route, process.argv[2])
+    .then((res) => {
+        console.log("MDLINKS: ", res);
+    }).catch((err) => {
+        console.log("MDLINKS ERROR: ",err);
     });
-};
-module.exports = {
-    mdLinks,
-};*/

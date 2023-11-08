@@ -38,5 +38,6 @@ module.exports = {
             "error",
             "always"
         ]
-    }
+    },
+    Plugins: ["jest"]
 };
