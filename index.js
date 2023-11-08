@@ -5,9 +5,12 @@ const { getURLStatus, transformRoute, routeExists, extractMarkdownLinks, isMarkd
 const readline = require("readline");
 const fs = require("fs");
 
+
+
 // empieza promesa
 // Definición de la función mdLinks que verifica y resuelve rutas
-const mdLinks = (route) => new Promise((resolve, reject) => {
+const mdLinks = (route, validate) => new Promise((resolve, reject) => {
+    console.log('------------------------------------------', process.argv[2])
     //console.log("Iniciando mdLinks con la ruta:", route);
     const absRoute = transformRoute(route); // Corregido el nombre de la variable
     //console.log("Ruta absoluta:", absRoute);
@@ -25,25 +28,31 @@ const mdLinks = (route) => new Promise((resolve, reject) => {
 
                         const links = extractMarkdownLinks(res); // Agregar función para extraer enlaces
                         //console.log("Enlaces extraídos:", links, res);
+                        if(validate){
+                            const linksPromises = links.map(link => getURLStatus(link.href))
+                            console.log({linksPromises})
 
-                        const linksPromises = links.map(link => getURLStatus(link.href))
-                        console.log({linksPromises})
-
-                        Promise.all(linksPromises)
-                        .then(res =>{
-                            for (let i = 0; i < links.length; i++) {
-                                //Agregar elementos a la respuesta final
-                                const data ={
-                                    text: links[i].text,
-                                    url: links[i].href,
-                                    status: res[i].status,
+                            Promise.all(linksPromises)
+                            .then(res =>{
+                                for (let i = 0; i < links.length; i++) {
+                                    //Agregar elementos a la respuesta final
+                                    const data ={
+                                        text: links[i].text,
+                                        url: links[i].href,
+                                        statusCode: res[i].status,
+                                        file: absRoute,
+                                        status: typeof res[i].status === 'string' ? 'Fail' : 'OK',
+                                    }
+                                    resultLink.push(data)  
                                 }
-                                resultLink.push(data)  
-                            }
-                            console.log('RESULT==============================>', resultLink)
-                        })
-                        .catch(error => console.log({ error }))
-                    }
+                                console.log('RESULT==============================>', resultLink)
+                            })
+                            .catch(error => console.log({ error }))
+                        }
+                        else{
+                            console.log('RESULT==============================>', links)
+                        }
+                }
                 })
                 .catch(error => {
                     console.log("function mdlinks :", error)
@@ -62,7 +71,7 @@ const mdLinks = (route) => new Promise((resolve, reject) => {
 const route = "./examples/README.md";
 //C:\Users\lapto\Documents\DEV010-md-links\examples\README.md
 //const route = "./examples/examples.js";
-mdLinks(route)
+mdLinks(route, process.argv[2])
     .then((res) => {
         console.log("MDLINKS: ", res);
     }).catch((err) => {

@@ -149,8 +149,6 @@ describe('extractMarkdownLinks', () => {
 
 jest.mock('axios');
 
-jest.mock('axios');
-
 describe('getURLStatus', () => {
     it('debe devolver el estado de una URL válida', (done) => {
         axios.get.mockResolvedValue({ status: 200 });
@@ -173,3 +171,35 @@ describe('getURLStatus', () => {
         });
     });
 });
+
+/*describe('getURLStatus', () => {
+    it('debería retornar el estado 200 para una URL válida', (done) => {
+      const url = 'https://www.google.com'; // Una URL válida que debería devolver 200
+      getURLStatus(url)
+        .then((result) => {
+          expect(result.status).toBe(200);
+          expect(result.ok).toBe('ok');
+          done();
+        });
+    });
+  
+    it('debería manejar errores 404 para una URL no encontrada', (done) => {
+      const url = 'https://www.ejemplo.com/url-no-existente'; // Una URL que debería devolver un error 404
+      getURLStatus(url)
+        .then((result) => {
+          expect(result.status).toBe(404);
+          expect(result.ok).toBe('fail');
+          done();
+        });
+    });
+  
+    it('debería manejar errores de red o tiempo de espera', (done) => {
+      const url = 'https://www.ejemplo.com/url-inexistente'; // Una URL que no existe
+      getURLStatus(url)
+        .then((result) => {
+          expect(result.status).toBe('Error: Network Error');
+          expect(result.ok).toBe('fail');
+          done();
+        });
+    });
+});*/
