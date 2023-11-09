@@ -4,7 +4,7 @@
 const { getURLStatus, transformRoute, routeExists, extractMarkdownLinks, isMarkdownFile, readMarkdownFile, isUrlValid } = require("./lib/app.js");
 const readline = require("readline");
 const fs = require("fs");
-
+//let colors = require("colors");
 
 
 // empieza promesa
@@ -45,12 +45,13 @@ const mdLinks = (route, validate) => new Promise((resolve, reject) => {
                                     }
                                     resultLink.push(data)  
                                 }
-                                console.log('RESULT==============================>', resultLink)
+                                console.table(resultLink)
                             })
                             .catch(error => console.log({ error }))
                         }
                         else{
-                            console.log('RESULT==============================>', links)
+                            resolve(links)
+                            console.table(links)
                         }
                 }
                 })
@@ -67,10 +68,10 @@ const mdLinks = (route, validate) => new Promise((resolve, reject) => {
     }
 });
 //termina promesa
-
-const route = "./examples/README.md";
-//C:\Users\lapto\Documents\DEV010-md-links\examples\README.md
-//const route = "./examples/examples.js";
+//const route = "./README.md"; // readme grande
+const route = "./examples/README.md"; // readme de prueba
+//C:\Users\lapto\Documents\DEV010-md-links\examples\README.md // ruta real
+//const route = "./examples/examples.js"; // prueba examples 2
 mdLinks(route, process.argv[2])
     .then((res) => {
         console.log("MDLINKS: ", res);

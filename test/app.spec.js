@@ -33,7 +33,7 @@ describe('transformRoute', () => {
 
 describe('routeExists', () => {
     it('Debería retornar true si la ruta existe', () => {
-        const existingRoute = __dirname; // Usar la carpeta actual como ejemplo
+        const existingRoute = "./examples/README.md";
         const result = routeExists(existingRoute);
         expect(result).toBe(true);
     });
@@ -53,12 +53,6 @@ describe('isMarkdownFile', () => {
         const result = isMarkdownFile(filePath);
         expect(result).toBe(true);
     });
-
-    /*it('Debería retornar true para una ruta de archivo de Markdown (.markdown)', () => {
-        const filePath = 'archivo.markdown';
-        const result = isMarkdownFile(filePath);
-        expect(result).toBe(true);
-    });*/
 
     it('Debería retornar false para una ruta de archivo que no es de Markdown', () => {
         const filePath = 'archivo.txt';
@@ -154,7 +148,9 @@ describe('getURLStatus', () => {
         axios.get.mockResolvedValue({ status: 200 });
 
         getURLStatus('https://github.com/Laboratoria/bootcamp/assets/12631491/fc6bc380-7824-4fab-ab8f-7ab53cd9d0e4').then((result) => {
-            expect(result).toEqual({ url: 'https://github.com/Laboratoria/bootcamp/assets/12631491/fc6bc380-7824-4fab-ab8f-7ab53cd9d0e4', status: 200 });
+            expect(result).toEqual({ url: 'https://github.com/Laboratoria/bootcamp/assets/12631491/fc6bc380-7824-4fab-ab8f-7ab53cd9d0e4', 
+            status: 200,
+             ok: "ok", });
             done();
         });
     });
@@ -166,40 +162,9 @@ describe('getURLStatus', () => {
             expect(result).toEqual({
                 url: 'https://example.com/lorem ipsum',
                 status: 'Error: Request failed with status code 404',
+                ok: "fail",
             });
             done();
         });
     });
 });
-
-/*describe('getURLStatus', () => {
-    it('debería retornar el estado 200 para una URL válida', (done) => {
-      const url = 'https://www.google.com'; // Una URL válida que debería devolver 200
-      getURLStatus(url)
-        .then((result) => {
-          expect(result.status).toBe(200);
-          expect(result.ok).toBe('ok');
-          done();
-        });
-    });
-  
-    it('debería manejar errores 404 para una URL no encontrada', (done) => {
-      const url = 'https://www.ejemplo.com/url-no-existente'; // Una URL que debería devolver un error 404
-      getURLStatus(url)
-        .then((result) => {
-          expect(result.status).toBe(404);
-          expect(result.ok).toBe('fail');
-          done();
-        });
-    });
-  
-    it('debería manejar errores de red o tiempo de espera', (done) => {
-      const url = 'https://www.ejemplo.com/url-inexistente'; // Una URL que no existe
-      getURLStatus(url)
-        .then((result) => {
-          expect(result.status).toBe('Error: Network Error');
-          expect(result.ok).toBe('fail');
-          done();
-        });
-    });
-});*/
