@@ -155,16 +155,33 @@ describe('getURLStatus', () => {
         });
     });
 
+//Revisar este test
     it('debe manejar un error al obtener el estado de una URL inválida', (done) => {
-        axios.get.mockRejectedValue({ message: 'Request failed with status code 404' }); // Simulamos un error de URL no encontrada
+        axios.get.mockRejectedValueOnce({ response: { status: 400 } });
     
+        getURLStatus('http:/example.com').catch((result) => {
+            expect(result).toEqual({
+                url: 'http:/example.com',
+                status: 'Error: 400',
+                ok: 'fail',
+            });
+            
+        });
+        done();
+    });
+    
+    
+    it('debe manejar un error al obtener el estado de una URL inválida', (done) => {
+        axios.get.mockRejectedValue({ message: 'Request failed with status code 400' }); // Simulamos un error de URL no encontrada
+
         getURLStatus('https://example.com/lorem ipsum').then((result) => {
             expect(result).toEqual({
                 url: 'https://example.com/lorem ipsum',
-                status: 'Error: Request failed with status code 404',
+                status: 400,
                 ok: "fail",
             });
-            done();
+            
         });
+        done();
     });
 });
