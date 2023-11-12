@@ -1,13 +1,3 @@
-/*const mdLinks = require("../");
-
-
-describe("mdLinks", () => {
-
-    it("should...", () => {
-        console.log("FIX ME!");
-    });
-
-});*/
 const { transformRoute, routeExists, isMarkdownFile, readMarkdownFile, isUrlValid, extractMarkdownLinks, getURLStatus } = require("../lib/app.js"); // ruta de módulo
 const path = require('path');
 const axios = require('axios');
