@@ -93,6 +93,8 @@ En general estas funciones proporcionan utilidades para trabajar con archivos, v
 ## 5. Tecnologías utilizadas.
 
 -   **JavaScript:** Lenguaje de programación de alto nivel y orientado a objetos.
+-   **Node.js:** Es un entorno de ejecución para JavaScript del lado del servidor. P
+-   **CommonJS:** Los módulos son una forma de organizar y estructuar código en archivos separados en JS. module.exports se utiliza para exportar las funciones y variables del módulo. require('./modulo') se utiliza para importar el módulo en otro archivo.
 -   **Módulo fs:** Para interactuar con el sistema de archivos.
 -   **Módulo path:** Para trabajar con rutas de archivos y directorios.
 -   **Axios:** Biblioteca para realizar solicitudes HTTP.
